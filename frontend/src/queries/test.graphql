@@ -1,0 +1,36 @@
+query TestUser($id:ID!) {
+  user(id:$id){
+    name
+    projects{
+      id
+      name
+    }
+  }
+}
+
+mutation createProject{
+  createProject(
+    input: {
+      name: "test32"
+      start_date: "2020-1-1"
+      end_date: "2020-1-1"
+      users: {
+        connect:[1,2]
+      }
+    }
+  )
+  {
+    id
+  }
+}
+
+mutation Login($username: String!, $password: String!){
+  login(input:{username:$username,password:$password}){
+    access_token
+    refresh_token
+    expires_in
+    user{
+      id
+    }
+  }
+}

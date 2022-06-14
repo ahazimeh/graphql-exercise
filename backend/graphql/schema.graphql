@@ -1,0 +1,48 @@
+"A date string with format `Y-m-d`, e.g. `2011-05-23`."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    users: [User!]! @paginate(defaultCount: 10) @can(ability:"create project", model: "App\\Models\\User")
+    # users:[User] @all
+    user(id: ID @eq): User @find
+    # me: User @middleware(checks:["auth:api"]) @auth
+    me: User @guard(with: ["api"]) @auth
+
+    projects: [Project!]! @all(scopes: ["verified"])
+}
+
+type Mutation {
+    createProject(input: ProjectInput @spread ):Project @create(scopes: ["verified"])
+    @inject(context: "user.id", name: "created_by")
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    projects: [Project!]! @belongsToMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Project {
+    id: ID!
+    name: String!
+    users: [User!]! @belongsToMany
+    created_by: Int
+}
+
+input ProjectInput {
+    name: String!
+    start_date: Date!
+    end_date: Date!
+    users: AttachUser
+}
+
+input AttachUser {
+    connect: [ID!]
+    sync: [ID!]
+}
